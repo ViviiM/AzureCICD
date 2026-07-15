@@ -1,0 +1,46 @@
+trigger:
+    branches:
+        include:
+            - main
+
+pool:
+    vmImage: "ubuntu-latest"
+
+variables:
+    - group: sf-ci-secrets # holds SF_CONSUMER_KEY, SF_USERNAME, SF_INSTANCE_URL
+
+steps:
+    - task: NodeTool@0
+      inputs:
+          versionSpec: "18.x"
+      displayName: "Install Node.js"
+
+    - script: |
+          npm install @salesforce/cli --location=global
+          sf --version
+      displayName: "Install Salesforce CLI"
+
+    # Decrypt/download the JWT server.key stored as a secure file in Azure DevOps Library
+    - task: DownloadSecureFile@1
+      name: serverKey
+      inputs:
+          secureFile: "server.key"
+      displayName: "Fetch JWT private key"
+
+    - script: |
+          sf org login jwt \
+            --client-id $(SF_CONSUMER_KEY) \
+            --jwt-key-file $(serverKey.secureFilePath) \
+            --username $(SF_USERNAME) \
+            --instance-url $(SF_INSTANCE_URL) \
+            --alias ciOrg \
+            --set-default
+      displayName: "Authenticate via JWT"
+
+    - script: |
+          sf project deploy start \
+            --source-dir force-app \
+            --target-org ciOrg \
+            --test-level RunLocalTests \
+            --wait 10
+      displayName: "Deploy ContactTrigger to org"
