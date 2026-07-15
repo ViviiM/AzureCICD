@@ -9,6 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      SF_SKIP_NEW_VERSION_CHECK: true
+      SF_DISABLE_TELEMETRY: true
+
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
@@ -18,16 +22,18 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1'
+          node-version: '18'
 
       - name: Install Salesforce CLI
         run: |
-          npm install -g @salesforce/cli@2.71.6
+          npm install -g @salesforce/cli@2.142.7
           sf --version
 
       - name: Install Git Delta Plugin
         run: |
-          sf plugins install sfdx-git-delta@5.38.0
+          mkdir -p ~/.local/share/sf
+          echo '["sfdx-git-delta"]' > ~/.local/share/sf/unsignedPluginAllowList.json
+          sf plugins install sfdx-git-delta@6.12.0
 
       - name: Create JWT Key File
         run: |
@@ -50,7 +56,7 @@ jobs:
           sf sgd source delta \
             --from HEAD~1 \
             --to HEAD \
-            --output delta
+            --output-dir delta
 
       - name: Deploy Changed Components
         run: |
