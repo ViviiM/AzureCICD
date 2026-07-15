@@ -50,7 +50,7 @@ jobs:
           sf sgd source delta \
             --from origin/main \
             --to HEAD \
-            --output-dir delta
+            --output delta
 
       - name: Check Delta Exists
         run: |

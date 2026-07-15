@@ -50,7 +50,7 @@ jobs:
           sf sgd source delta \
             --from HEAD~1 \
             --to HEAD \
-            --output-dir delta
+            --output delta
 
       - name: Deploy Changed Components
         run: |
