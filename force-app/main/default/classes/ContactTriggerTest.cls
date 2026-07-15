@@ -27,7 +27,19 @@ private class ContactTriggerTest {
         System.assertEquals('Cold Call', result.LeadSource,
             'Trigger should not override existing LeadSource on before insert');
     }
+    // ✅ Covers: ContactHandler null/empty list guard clause
+    @isTest
+    static void testHandler_NullAndEmptyList() {
+        Test.startTest();
 
+        ContactHandler.handleBeforeSave(null);
+        ContactHandler.handleBeforeSave(new List<Contact>());
+
+        Test.stopTest();
+
+        System.assert(true,
+            'Method should safely handle null and empty lists without exceptions');
+    }
     // ✅ Covers: ContactTrigger (before update) → ContactHandler: blank LeadSource branch → sets 'Phone Inquiry'
     @isTest
     static void testTrigger_BeforeUpdate_SetsLeadSource() {
