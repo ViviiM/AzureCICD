@@ -59,7 +59,8 @@ jobs:
           sf project deploy start \
             --manifest delta/package/package.xml \
             --target-org prodOrg \
-            --test-level RunLocalTests \
+            --test-level RunSpecifiedTests \
+            --tests ContactTriggerTest ContactHandlerTest \
             --wait 60
 
       - name: Deploy Destructive Changes

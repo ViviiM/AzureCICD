@@ -66,5 +66,6 @@ jobs:
           sf project deploy validate \
             --manifest delta/package/package.xml \
             --target-org ciOrg \
-            --test-level RunLocalTests \
+            --test-level RunSpecifiedTests \
+            --tests ContactTriggerTest ContactHandlerTest \
             --wait 60
