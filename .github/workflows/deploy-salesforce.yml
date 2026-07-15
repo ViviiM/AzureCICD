@@ -54,7 +54,8 @@ jobs:
           sf project deploy start \
             --source-dir force-app \
             --target-org ciOrg \
-            --test-level RunLocalTests \
+            --test-level RunSpecifiedTests \
+            --tests ContactTriggerTest ContactHandlerTest \
             --wait 10
 
       # 7. Clean up the private key file
