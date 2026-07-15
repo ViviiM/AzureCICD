@@ -21,15 +21,13 @@ jobs:
           node-version: 20
 
       - name: Install Salesforce CLI
-        uses: salesforcecli/github-action@v2
-        
-      - name: Verify CLI
         run: |
+          npm install -g @salesforce/cli@latest
           sf --version
 
       - name: Install Git Delta Plugin
         run: |
-          echo y | sf plugins install sfdx-git-delta --force
+          echo y | sf plugins install sfdx-git-delta@latest
 
       - name: Create JWT Key File
         run: |
