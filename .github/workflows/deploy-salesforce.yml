@@ -12,13 +12,13 @@ jobs:
     steps:
       # 1. Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
-      # 2. Install Node.js 18
+      # 2. Install Node.js 20
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.4.0
         with:
-          node-version: "18"
+          node-version: "20"
 
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
@@ -28,17 +28,23 @@ jobs:
 
       # 4. Write JWT private key from GitHub Secret to a file
       - name: Write JWT private key
+        env:
+          SF_JWT_KEY: ${{ secrets.SF_JWT_KEY }}
         run: |
-          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          echo "$SF_JWT_KEY" > server.key
 
       # 5. Authenticate via JWT
       - name: Authenticate to Salesforce
+        env:
+          SF_CONSUMER_KEY: ${{ secrets.SF_CONSUMER_KEY }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_INSTANCE_URL: ${{ secrets.SF_INSTANCE_URL }}
         run: |
           sf org login jwt \
-            --client-id ${{ secrets.SF_CONSUMER_KEY }} \
+            --client-id "$SF_CONSUMER_KEY" \
             --jwt-key-file server.key \
-            --username ${{ secrets.SF_USERNAME }} \
-            --instance-url ${{ secrets.SF_INSTANCE_URL }} \
+            --username "$SF_USERNAME" \
+            --instance-url "$SF_INSTANCE_URL" \
             --alias ciOrg \
             --set-default
 
