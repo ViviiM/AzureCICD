@@ -22,10 +22,10 @@ jobs:
       - name: Install Salesforce CLI
         run: |
           wget -q https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-x64.tar.gz
-          mkdir -p /usr/local/sf-cli
-          tar xzf sf-linux-x64.tar.gz -C /usr/local/sf-cli --strip-components=1
-          echo "/usr/local/sf-cli/bin" >> $GITHUB_PATH
-          /usr/local/sf-cli/bin/sf --version
+          mkdir -p $HOME/sf-cli
+          tar xzf sf-linux-x64.tar.gz -C $HOME/sf-cli --strip-components=1
+          echo "$HOME/sf-cli/bin" >> $GITHUB_PATH
+          $HOME/sf-cli/bin/sf --version
 
       - name: Install Git Delta Plugin
         run: |
