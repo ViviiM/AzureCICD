@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    if: false # Disables this job for testing 
     runs-on: ubuntu-latest
 
     steps:

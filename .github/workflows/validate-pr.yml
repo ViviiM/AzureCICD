@@ -1,0 +1,67 @@
+name: Validate Salesforce PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+
+      - name: Install Git Delta Plugin
+        run: |
+          echo y | sf plugins install sfdx-git-delta
+
+      - name: Create JWT Key File
+        run: |
+          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          chmod 600 server.key
+
+      - name: Authenticate
+        run: |
+          sf org login jwt \
+            --client-id ${{ secrets.SF_CLIENT_ID }} \
+            --jwt-key-file server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --instance-url ${{ secrets.SF_INSTANCE_URL }} \
+            --alias ciOrg
+
+      - name: Generate Delta Package
+        run: |
+          mkdir delta
+
+          sf sgd source delta \
+            --from origin/main \
+            --to HEAD \
+            --output-dir delta
+
+      - name: Check Delta Exists
+        run: |
+          if [ ! -f delta/package/package.xml ]; then
+            echo "No metadata changes found."
+            exit 0
+          fi
+
+      - name: Validate Deployment
+        run: |
+          sf project deploy validate \
+            --manifest delta/package/package.xml \
+            --target-org ciOrg \
+            --test-level RunLocalTests \
+            --wait 60
