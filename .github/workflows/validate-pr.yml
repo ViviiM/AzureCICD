@@ -21,8 +21,10 @@ jobs:
           node-version: 20
 
       - name: Install Salesforce CLI
+        uses: salesforcecli/github-action@v2
+        
+      - name: Verify CLI
         run: |
-          npm install -g @salesforce/cli@latest
           sf --version
 
       - name: Install Git Delta Plugin
