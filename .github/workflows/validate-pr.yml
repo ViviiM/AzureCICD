@@ -18,16 +18,16 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Salesforce CLI
         run: |
-          npm install -g @salesforce/cli
+          npm install -g @salesforce/cli@latest
           sf --version
 
       - name: Install Git Delta Plugin
         run: |
-          echo y | sf plugins install sfdx-git-delta
+          echo y | sf plugins install sfdx-git-delta --force
 
       - name: Create JWT Key File
         run: |
