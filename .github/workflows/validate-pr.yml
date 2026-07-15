@@ -18,11 +18,12 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Salesforce CLI
         run: |
           npm install -g @salesforce/cli
+          sf --version
 
       - name: Install Git Delta Plugin
         run: |

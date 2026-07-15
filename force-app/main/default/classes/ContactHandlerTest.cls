@@ -1,14 +1,14 @@
 @isTest
 private class ContactHandlerTest {
 
-    // ✅ Branch 1: LeadSource is blank → should default to 'Web'
+    // ✅ Branch 1: LeadSource is blank → should default to 'Phone Inquiry'
     @isTest
     static void testDefaultLeadSource_WhenBlank() {
         Contact c = new Contact(LastName = 'Test Blank');
         insert c;
 
         Contact result = [SELECT LeadSource FROM Contact WHERE Id = :c.Id];
-        System.assertEquals('Web', result.LeadSource, 'LeadSource should default to Web when blank');
+        System.assertEquals('Phone Inquiry', result.LeadSource, 'LeadSource should default to Phone Inquiry when blank');
     }
 
     // ✅ Branch 2: LeadSource already has a value → should NOT be overridden
@@ -37,7 +37,7 @@ private class ContactHandlerTest {
         List<Contact> results = [SELECT LeadSource FROM Contact WHERE Id IN :contacts];
         for (Integer i = 0; i < results.size(); i++) {
             if (String.isBlank(contacts[i].LeadSource)) {
-                System.assertEquals('Web', results[i].LeadSource, 'Blank LeadSource should be set to Web');
+                System.assertEquals('Phone Inquiry', results[i].LeadSource, 'Blank LeadSource should be set to Phone Inquiry');
             } else {
                 System.assertEquals('Partner', results[i].LeadSource, 'Existing LeadSource should be preserved');
             }
@@ -51,11 +51,11 @@ private class ContactHandlerTest {
         Contact c = new Contact(LastName = 'Update Test', LeadSource = 'Phone');
         insert c;
 
-        // Clear LeadSource and update — trigger should set it to 'Web'
+        // Clear LeadSource and update — trigger should set it to 'Phone Inquiry'
         c.LeadSource = null;
         update c;
 
         Contact result = [SELECT LeadSource FROM Contact WHERE Id = :c.Id];
-        System.assertEquals('Web', result.LeadSource, 'LeadSource should be set to Web on update when blank');
+        System.assertEquals('Phone Inquiry', result.LeadSource, 'LeadSource should be set to Phone Inquiry on update when blank');
     }
 }
