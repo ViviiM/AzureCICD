@@ -14,11 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
 
-      # 2. Install Node.js 20
+      # 2. Install Node.js 22 (required by SF CLI undici dependency)
       - name: Set up Node.js
         uses: actions/setup-node@v4.4.0
         with:
-          node-version: "20"
+          node-version: "22"
 
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
