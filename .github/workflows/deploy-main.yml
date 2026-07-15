@@ -27,14 +27,14 @@ jobs:
 
       - name: Install Salesforce CLI
         run: |
-          npm install -g @salesforce/cli@2.71.6
+          npm install -g @salesforce/cli@2.142.7
           sf --version
 
       - name: Install Git Delta Plugin
         run: |
           mkdir -p ~/.local/share/sf
           echo '["sfdx-git-delta"]' > ~/.local/share/sf/unsignedPluginAllowList.json
-          sf plugins install sfdx-git-delta@5.38.0
+          sf plugins install sfdx-git-delta@6.12.0
 
       - name: Create JWT Key File
         run: |
@@ -57,7 +57,7 @@ jobs:
           sf sgd source delta \
             --from HEAD~1 \
             --to HEAD \
-            --output delta
+            --output-dir delta
 
       - name: Deploy Changed Components
         run: |
