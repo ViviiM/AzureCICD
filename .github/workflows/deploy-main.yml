@@ -1,0 +1,76 @@
+name: Deploy Salesforce Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SF_SKIP_NEW_VERSION_CHECK: true
+      SF_DISABLE_TELEMETRY: true
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Salesforce CLI
+        run: |
+          wget -q https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-x64.tar.gz
+          mkdir -p $HOME/sf-cli
+          tar xzf sf-linux-x64.tar.gz -C $HOME/sf-cli --strip-components=1
+          echo "$HOME/sf-cli/bin" >> $GITHUB_PATH
+          $HOME/sf-cli/bin/sf --version
+
+      - name: Install Git Delta Plugin
+        run: |
+          yes | sf plugins install sfdx-git-delta@6.12.0
+
+      - name: Create JWT Key File
+        run: |
+          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          chmod 600 server.key
+
+      - name: Authenticate
+        run: |
+          sf org login jwt \
+            --client-id ${{ secrets.SF_CONSUMER_KEY }} \
+            --jwt-key-file server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --instance-url ${{ secrets.SF_INSTANCE_URL }} \
+            --alias prodOrg
+
+      - name: Generate Delta Package
+        run: |
+          mkdir delta
+
+          sf sgd source delta \
+            --from HEAD~1 \
+            --to HEAD \
+            --output-dir delta
+
+      - name: Deploy Changed Components
+        run: |
+          sf project deploy start \
+            --manifest delta/package/package.xml \
+            --target-org prodOrg \
+            --test-level RunSpecifiedTests \
+            --tests ContactTriggerTest ContactHandlerTest \
+            --wait 60
+
+      - name: Deploy Destructive Changes
+        run: |
+          if [ -f delta/destructiveChanges/destructiveChanges.xml ]; then
+
+            sf project deploy start \
+              --manifest delta/package/package.xml \
+              --post-destructive-changes delta/destructiveChanges/destructiveChanges.xml \
+              --target-org prodOrg \
+              --wait 60
+
+          fi

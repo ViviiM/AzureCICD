@@ -1,7 +1,8 @@
 @isTest
 private class ContactTriggerTest {
 
-    // ✅ Covers: Trigger before insert → ContactHandler.handleBeforeSave called
+    // ✅ Covers: ContactTrigger (before insert) → ContactHandler.handleBeforeSave
+    //           ContactHandler: blank LeadSource branch → sets 'Phone Inquiry'
     @isTest
     static void testTrigger_BeforeInsert_SetsLeadSource() {
         Test.startTest();
@@ -10,11 +11,11 @@ private class ContactTriggerTest {
         Test.stopTest();
 
         Contact result = [SELECT LeadSource FROM Contact WHERE Id = :c.Id];
-        System.assertEquals('Web', result.LeadSource,
-            'Trigger should set LeadSource to Web on before insert');
+        System.assertEquals('Phone Inquiry', result.LeadSource,
+            'Trigger should set LeadSource to Phone Inquiry on before insert');
     }
 
-    // ✅ Covers: Trigger before insert with LeadSource already set → not overridden
+    // ✅ Covers: ContactTrigger (before insert) → ContactHandler: non-blank branch → preserved
     @isTest
     static void testTrigger_BeforeInsert_PreservesLeadSource() {
         Test.startTest();
@@ -26,8 +27,20 @@ private class ContactTriggerTest {
         System.assertEquals('Cold Call', result.LeadSource,
             'Trigger should not override existing LeadSource on before insert');
     }
+    // ✅ Covers: ContactHandler null/empty list guard clause
+    @isTest
+    static void testHandler_NullAndEmptyList() {
+        Test.startTest();
 
-    // ✅ Covers: Trigger before update → ContactHandler.handleBeforeSave called on update
+        ContactHandler.handleBeforeSave(null);
+        ContactHandler.handleBeforeSave(new List<Contact>());
+
+        Test.stopTest();
+
+        System.assert(true,
+            'Method should safely handle null and empty lists without exceptions');
+    }
+    // ✅ Covers: ContactTrigger (before update) → ContactHandler: blank LeadSource branch → sets 'Phone Inquiry'
     @isTest
     static void testTrigger_BeforeUpdate_SetsLeadSource() {
         Contact c = new Contact(LastName = 'Trigger Update Test', LeadSource = 'Email');
@@ -39,11 +52,11 @@ private class ContactTriggerTest {
         Test.stopTest();
 
         Contact result = [SELECT LeadSource FROM Contact WHERE Id = :c.Id];
-        System.assertEquals('Web', result.LeadSource,
-            'Trigger should set LeadSource to Web on before update when blank');
+        System.assertEquals('Phone Inquiry', result.LeadSource,
+            'Trigger should set LeadSource to Phone Inquiry on before update when blank');
     }
 
-    // ✅ Covers: Trigger before update → existing LeadSource preserved
+    // ✅ Covers: ContactTrigger (before update) → ContactHandler: non-blank branch → preserved
     @isTest
     static void testTrigger_BeforeUpdate_PreservesLeadSource() {
         Contact c = new Contact(LastName = 'Trigger Update Preserve', LeadSource = 'Web');
@@ -59,7 +72,7 @@ private class ContactTriggerTest {
             'Trigger should not change LeadSource when already set on update');
     }
 
-    // ✅ Covers: Bulk before insert → trigger handles multiple records
+    // ✅ Covers: ContactTrigger (before insert) bulk → ContactHandler: handles 200 records
     @isTest
     static void testTrigger_BulkInsert() {
         List<Contact> contacts = new List<Contact>();
@@ -73,8 +86,8 @@ private class ContactTriggerTest {
 
         List<Contact> results = [SELECT LeadSource FROM Contact WHERE Id IN :contacts];
         for (Contact result : results) {
-            System.assertEquals('Web', result.LeadSource,
-                'All bulk contacts without LeadSource should default to Web');
+            System.assertEquals('Phone Inquiry', result.LeadSource,
+                'All bulk contacts without LeadSource should default to Phone Inquiry');
         }
     }
 }
