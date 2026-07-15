@@ -22,11 +22,12 @@ jobs:
 
       - name: Install Salesforce CLI
         run: |
-          npm install -g @salesforce/cli@latest
+          npm install -g @salesforce/cli@2.71.6
+          sf --version
 
       - name: Install Git Delta Plugin
         run: |
-          echo y | sf plugins install sfdx-git-delta@6.12.0
+          echo y | sf plugins install sfdx-git-delta@5.38.0
 
       - name: Create JWT Key File
         run: |
